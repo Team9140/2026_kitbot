@@ -9,6 +9,16 @@
 
 #include "main.h"
 
+int applyDeadband(int in, int deadband) {
+	if (abs(in) < deadband) {
+		return 0;
+	} else if (in > 0) {
+		return (in - deadband);
+	} else {
+		return (in + deadband);
+	}
+}
+
 /*
  * Runs the user operator control code. This function will be started in its own task with the
  * default priority and stack size whenever the robot is enabled via the Field Management System
@@ -62,18 +72,19 @@ void operatorControl() {
 		// }
 
 		if (joystickGetDigital(1, 6, JOY_UP)) {
-			motorSet(5, 127);
+			motorSet(5, 30);
 			motorSet(8, 127);
 		} else if (joystickGetDigital(1, 5, JOY_UP)) {
-			motorSet(5, 127);
+			motorSet(5, (int) (0.67 * 6 / 7 * 127));
 			motorSet(8, -127);
 		} else {
 			motorSet(5, 0);
 			motorSet(8, 0);
 		}
 
-		power = -joystickGetAnalog(1, 3); // vertical axis on left joystick
-        turn  = joystickGetAnalog(1, 1); // horizontal axis on left joystick
+		power = applyDeadband(-joystickGetAnalog(1, 3), 5); // vertical axis on left joystick
+        turn  = applyDeadband(joystickGetAnalog(1, 1), 5); // horizontal axis on left joystick
+
         motorSet(6, power + turn); // set left wheels
         motorSet(7, -power + turn); // set right wheels
 		delay(20);
