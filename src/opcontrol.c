@@ -39,6 +39,7 @@ int applyDeadband(int in, int deadband) {
 void operatorControl() {
 	int power;
   	int turn;
+	int loopsHeld = 0;
     while (1) {
         power = joystickGetAnalog(1, 2); // vertical axis on left joystick
         turn  = joystickGetAnalog(1, 1); // horizontal axis on left joystick
@@ -72,14 +73,20 @@ void operatorControl() {
 		// }
 
 		if (joystickGetDigital(1, 6, JOY_UP)) {
-			motorSet(5, 30);
-			motorSet(8, 127);
-		} else if (joystickGetDigital(1, 5, JOY_UP)) {
-			motorSet(5, (int) (0.67 * 6 / 7 * 127));
+			motorSet(2, 127);
+			motorSet(5, -30);
 			motorSet(8, -127);
+			loopsHeld = 0;
+		} else if (joystickGetDigital(1, 5, JOY_UP)) {
+			motorSet(5, -127);
+			motorSet(8, 127);
+			loopsHeld++;
+			if (loopsHeld >= 35) motorSet(2, -127);
 		} else {
+			motorSet(2, 0);
 			motorSet(5, 0);
 			motorSet(8, 0);
+			loopsHeld = 0;
 		}
 
 		power = applyDeadband(-joystickGetAnalog(1, 3), 5); // vertical axis on left joystick
